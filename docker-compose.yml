@@ -2,6 +2,7 @@ version: '3.9'
 
 networks:
   galera_network:
+    name: galera_network
     attachable: true
     driver: overlay
     ipam:
