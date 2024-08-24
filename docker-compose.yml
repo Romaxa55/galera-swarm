@@ -1,5 +1,13 @@
 version: '3.9'
 
+networks:
+  galera_network:
+    external: true
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 10.0.10.0/24
+
 services:
   seed: &default_service
     image: colinmollenhour/mariadb-galera-swarm:10.11.6-2023-12-09
@@ -43,13 +51,6 @@ volumes:
   mysql-data:
     name: '{{.Service.Name}}-{{.Task.Slot}}-data'
     driver: local
-
-networks:
-  galera_network:
-    driver: overlay
-    ipam:
-      config:
-        - subnet: 10.0.10.0/24
 
 secrets:
   xtrabackup_password:
