@@ -1,12 +1,20 @@
 #!/bin/bash
 
+# Загрузка переменных окружения из .env файла
+if [ -f .env ]; then
+    export $(cat .env | xargs)
+else
+    echo ".env file not found. Exiting."
+    exit 1
+fi
+
 # Создаем директорию для хранения секретов
 mkdir -p .secrets
 
-# Генерируем пароли и сохраняем их в файлы
-openssl rand -base64 32 > .secrets/xtrabackup_password
-openssl rand -base64 32 > .secrets/mysql_password
-openssl rand -base64 32 > .secrets/mysql_root_password
+# Сохраняем пароли в файлы
+echo "$XTRABACKUP_PASSWORD" > .secrets/xtrabackup_password
+echo "$MYSQL_PASSWORD" > .secrets/mysql_password
+echo "$MYSQL_ROOT_PASSWORD" > .secrets/mysql_root_password
 
 # Развертывание Docker стека
 docker stack deploy -c docker-compose.yml galera
