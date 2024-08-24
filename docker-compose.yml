@@ -43,7 +43,8 @@ services:
           - node.role == manager
     secrets:
       - xtrabackup_password
-    <<: *healthcheck
+    healthcheck:
+      <<: *healthcheck
 
 volumes:
   mysql-data:
