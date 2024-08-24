@@ -53,7 +53,6 @@ check_service_health() {
     done
 }
 
-
 # Ожидаем, пока сервис galera_seed не станет здоровым
 echo "Waiting for galera_seed to be healthy..."
 check_service_health galera_seed
