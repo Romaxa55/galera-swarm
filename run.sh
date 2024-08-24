@@ -23,19 +23,38 @@ docker stack deploy -c docker-compose.yml galera
 check_service_health() {
     local service_name=$1
     while true; do
-        container_id=$(docker ps -q --filter "name=${service_name}")
-        if [ -z "$container_id" ]; then
-            echo "No containers found for service $service_name. Waiting..."
+        # Получаем список ID задач, запущенных для сервиса
+        task_ids=$(docker service ps -q $service_name)
+
+        if [ -z "$task_ids" ]; then
+            echo "No tasks found for service $service_name. Waiting..."
             sleep 5
             continue
         fi
 
-        health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}unhealthy{{end}}' $container_id)
-        if [ "$health_status" == "healthy" ]; then
+        all_healthy=true
+        for task_id in $task_ids; do
+            # Получаем ID контейнера, связанного с задачей
+            container_id=$(docker inspect --format '{{.Status.ContainerStatus.ContainerID}}' $task_id)
+            if [ -z "$container_id" ]; then
+                all_healthy=false
+                echo "Task $task_id has no associated container. Waiting..."
+                break
+            fi
+
+            # Проверяем состояние здоровья контейнера
+            health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}unhealthy{{end}}' $container_id)
+            if [ "$health_status" != "healthy" ]; then
+                all_healthy=false
+                echo "Task $task_id (container $container_id) is not healthy (current status: $health_status). Waiting..."
+                break
+            fi
+        done
+
+        if [ "$all_healthy" = true ]; then
             echo "$service_name is healthy!"
             break
         else
-            echo "Still waiting for $service_name to be healthy (current status: $health_status)..."
             sleep 5
         fi
     done
