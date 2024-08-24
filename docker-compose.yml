@@ -45,7 +45,6 @@ services:
         max_replicas_per_node: 1
         constraints:
           - node.role == manager
-          - node.labels.role == node-{{.Task.Slot}}
     healthcheck: # Отключаем healthcheck для node
       test: []
 
