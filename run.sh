@@ -23,42 +23,36 @@ docker stack deploy -c docker-compose.yml galera
 check_service_health() {
     local service_name=$1
     while true; do
-        # Получаем список ID задач, запущенных для сервиса
-        task_ids=$(docker service ps -q $service_name)
+        # Получаем список задач сервиса
+        tasks=$(docker service ps --filter "desired-state=running" --format "{{.ID}} {{.Node}} {{.CurrentState}}" $service_name)
 
-        if [ -z "$task_ids" ]; then
-            echo "No tasks found for service $service_name. Waiting..."
+        if [ -z "$tasks" ]; then
+            echo "No running tasks found for service $service_name. Waiting..."
             sleep 5
             continue
         fi
 
         all_healthy=true
-        for task_id in $task_ids; do
-            # Получаем ID контейнера, связанного с задачей
-            container_id=$(docker inspect --format '{{.Status.ContainerStatus.ContainerID}}' $task_id)
-            if [ -z "$container_id" ]; then
-                all_healthy=false
-                echo "Task $task_id has no associated container. Waiting..."
-                break
-            fi
+        for task in $tasks; do
+            task_id=$(echo $task | awk '{print $1}')
+            task_state=$(echo $task | awk '{print $3}')
 
-            # Проверяем состояние здоровья контейнера
-            health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}unhealthy{{end}}' $container_id)
-            if [ "$health_status" != "healthy" ]; then
+            if [[ "$task_state" != *"Running"* ]]; then
                 all_healthy=false
-                echo "Task $task_id (container $container_id) is not healthy (current status: $health_status). Waiting..."
+                echo "Task $task_id is not in a healthy state (current state: $task_state). Waiting..."
                 break
             fi
         done
 
         if [ "$all_healthy" = true ]; then
-            echo "$service_name is healthy!"
+            echo "Service $service_name is healthy!"
             break
         else
             sleep 5
         fi
     done
 }
+
 
 # Ожидаем, пока сервис galera_seed не станет здоровым
 echo "Waiting for galera_seed to be healthy..."
