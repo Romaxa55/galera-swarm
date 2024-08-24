@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   seed:
-    image: colinmollenhour/mariadb-galera-swarm:10.11.6-2023-12-09
+    image: colinmollenhour/mariadb-galera-swarm:10.8.3-2022-08-16
     env_file:
       - .env
     environment:
@@ -25,7 +25,7 @@ services:
       retries: 5
 
   node:
-    image: colinmollenhour/mariadb-galera-swarm:10.11.6-2023-12-09
+    image: colinmollenhour/mariadb-galera-swarm:10.8.3-2022-08-16
     environment:
       - XTRABACKUP_PASSWORD_FILE=/run/secrets/xtrabackup_password
       - NODE_ADDRESS=^10.0.*.*
