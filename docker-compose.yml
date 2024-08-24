@@ -18,6 +18,13 @@ services:
       - xtrabackup_password
       - mysql_password
       - mysql_root_password
+    healthcheck: &healthcheck
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$MYSQL_ROOT_PASSWORD || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   node:
     image: colinmollenhour/mariadb-galera-swarm:10.6.16-2023-12-09
     environment:
@@ -37,6 +44,7 @@ services:
           - node.role == manager
     secrets:
       - xtrabackup_password
+    <<: *healthcheck
 
 volumes:
   mysql-data:
