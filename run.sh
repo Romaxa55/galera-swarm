@@ -33,11 +33,11 @@ check_service_health() {
         fi
 
         all_healthy=true
-        for task in $tasks; do
+        for task in "$tasks"; do
             task_id=$(echo $task | awk '{print $1}')
             task_state=$(echo $task | awk '{print $3}')
 
-            if [[ "$task_state" != *"Running"* ]]; then
+            if [[ "$task_state" != "Running" ]] && [[ "$task_state" != "Ready" ]] && [[ "$task_state" != "Starting" ]]; then
                 all_healthy=false
                 echo "Task $task_id is not in a healthy state (current state: $task_state). Waiting..."
                 break
