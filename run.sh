@@ -8,8 +8,6 @@ else
     exit 1
 fi
 
-# Создаем директорию для хранения секретов
-mkdir -p .secrets
 
 # Сохраняем пароли в файлы
 echo "$XTRABACKUP_PASSWORD" > .secrets/xtrabackup_password
