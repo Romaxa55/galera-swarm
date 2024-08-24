@@ -74,6 +74,9 @@ volumes:
 networks:
   galera_network:
     driver: overlay
+    ipam:
+      config:
+        - subnet: 10.0.10.0/24
 
 secrets:
   xtrabackup_password:
