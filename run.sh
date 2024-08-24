@@ -8,6 +8,8 @@ else
     exit 1
 fi
 
+# Создаем директорию для хранения секретов
+mkdir -p .secrets
 
 # Сохраняем пароли в файлы
 echo "$XTRABACKUP_PASSWORD" > .secrets/xtrabackup_password
@@ -21,24 +23,19 @@ docker stack deploy -c docker-compose.yml galera
 check_service_health() {
     local service_name=$1
     while true; do
-        service_id=$(docker service ps -q --filter "desired-state=running" $service_name)
-        if [ -z "$service_id" ]; then
-            echo "Service $service_name is not running. Waiting..."
-            sleep 5
-            continue
-        fi
-        container_id=$(docker ps -q --filter "name=$service_name")
+        container_id=$(docker ps -q --filter "name=${service_name}")
         if [ -z "$container_id" ]; then
             echo "No containers found for service $service_name. Waiting..."
             sleep 5
             continue
         fi
-        health_status=$(docker inspect --format='{{.State.Health.Status}}' $container_id)
+
+        health_status=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}unhealthy{{end}}' $container_id)
         if [ "$health_status" == "healthy" ]; then
             echo "$service_name is healthy!"
             break
         else
-            echo "Still waiting for $service_name to be healthy..."
+            echo "Still waiting for $service_name to be healthy (current status: $health_status)..."
             sleep 5
         fi
     done
