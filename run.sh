@@ -67,7 +67,7 @@ check_service_health galera_node
 # Масштабирование galera_seed до 0 экземпляров
 docker service scale galera_seed=0
 
-# Масштабирование galera_node до 3 экземпляров
-docker service scale galera_node=3
+# Масштабирование galera_node до 4 экземпляров
+docker service scale galera_node=4
 
 echo "Galera cluster deployment and scaling complete!"
