@@ -41,10 +41,10 @@ services:
         max_replicas_per_node: 1
         constraints:
           - node.role == manager
+      endpoint_mode: dnsrr
     secrets:
       - xtrabackup_password
-#    healthcheck:
-#      <<: *healthcheck
+
 
 volumes:
   mysql-data:
